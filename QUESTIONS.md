@@ -35,3 +35,13 @@
 13. **Testing Strategy**: How do we test complex temporal interactions? Should we build debugging tools to visualize timeline states?
 
 14. **Performance Targets**: What are our performance requirements for the web version? How complex can levels be before we hit performance issues?
+
+### Development Process Questions
+
+15. **State Management**: Should we use a state management library (Redux, Zustand, etc.) or React Context for managing the complex game state? This affects how multiple agents can work on different parts of the game.
+
+16. **Component Architecture**: How granular should our React components be? Should we have separate components for each hex tile, or render the entire grid as one component for better performance?
+
+17. **Testing Standards**: What level of test coverage should we maintain? Should every game mechanic have unit tests, or focus on integration tests for complex interactions?
+
+18. **Code Review Process**: How should multiple coding agents coordinate changes to avoid conflicts? Should there be designated "owners" for different modules?
