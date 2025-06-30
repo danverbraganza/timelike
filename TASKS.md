@@ -53,6 +53,14 @@ Blocked by: Task 18
 Assigned to: Coding Agent
 Priority: HIGH
 
+
+------
+Id: 20
+Title: Implement Extremely simple visualization of level
+Description: For immediate feedback of the development process, provide a simple visualization + user interface of the level. Build out a dummy level with an infinite turn timer. Allow the player to move around the level. All code to be implemented now must be temporary, and use docstrings to highlight that this is "tracer bullets" or "jig" code that will be refactored soon.
+Status: READY
+Priority: HIGH
+
 ------
 
 ### Phase 2: Basic Gameplay Systems
