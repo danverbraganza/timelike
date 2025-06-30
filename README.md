@@ -71,7 +71,21 @@ You will be prompted appropriately to let you know what kind of agent you are.
 Planning Agents _only_ plan, and do not write code.
 
 Coding Agents code in as limited a fashions as possible, to narrowly fit the
-problem definition. Any open questions that a Coding Agent has will be added to TASKS.md
+problem definition. Any open questions that a Coding Agent has will be added to QUESTIONS.md
+
+**CRITICAL for Coding Agents**: Before starting any implementation work, you MUST:
+1. Read and understand PROJECT_STRUCTURE.md - this defines the required directory structure and architecture
+2. Review TASKS.md to understand task dependencies and current priorities
+3. Check QUESTIONS.md for any architectural concerns or blockers
+4. Follow the Software Architecture guidelines below strictly
+
+### Current Project Status
+
+**Phase 1 Complete**: Basic project setup and hexagonal grid system are implemented and tested.
+
+**Architecture Alignment Needed**: The codebase needs restructuring to match the planned architecture before proceeding with game features. See Tasks 18 and 19 in TASKS.md.
+
+**Next Priority**: Establish proper separation between game logic and UI before implementing the core game loop
 
 
 ## Level Design
@@ -97,3 +111,30 @@ coding agents can effectively collaborate on the design.
   game loop from the user interface design.
 * Any persistent state can be stored in local storage for now, but keep it
   abstractable so that we can build this in a backend-aware way later.
+
+### Architecture Guidelines
+
+1. **Separation of Concerns**: 
+   - Game logic MUST be kept in `src/game/` directory, completely separate from React components
+   - UI components in `src/components/` should only handle presentation and user input
+   - State management in `src/store/` should bridge game logic and UI
+
+2. **Module Organization**:
+   - `src/game/` - Core game engine, turn logic, time manipulation
+   - `src/components/` - React UI components
+   - `src/hooks/` - Custom React hooks for game integration
+   - `src/store/` - State management (consider Zustand for simplicity)
+   - `src/types/` - TypeScript type definitions
+   - `src/utils/` - Generic utilities (hex math, etc.)
+
+3. **Testing Strategy**:
+   - Unit tests for all game logic modules
+   - Integration tests for complex temporal interactions
+   - Component tests for UI elements
+   - Maintain >80% coverage for critical game systems
+
+4. **Performance Considerations**:
+   - Bitemporal state storage will grow linearly with turns
+   - Consider implementing state compression after 100 turns
+   - Use React.memo and useMemo for expensive grid renders
+   - Profile before optimizing

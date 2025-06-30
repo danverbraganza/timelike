@@ -25,9 +25,42 @@ Completed: Complete hexagonal grid system implemented with HexGrid class, advanc
 Id: 3
 Title: Design Core Game State Architecture
 Description: Create the main game state structure that can handle bitemporal data (storing game state at each turn). Design interfaces for Game, Level, Character, Item, and Turn data structures.
+Status: BLOCKED
+Blocked by: Tasks 18, 19
+Assigned to: Coding Agent
+Architectural Requirements:
+- Create src/game/ directory structure
+- Implement GameEngine class to manage game state
+- Create TurnManager for turn-based logic
+- Design BitemporalStore for time travel mechanics
+- Keep all game logic separate from React components
+
+------
+
+### Phase 0: Architecture Alignment (URGENT)
+
+Id: 18
+Title: Refactor Code to Match Planned Architecture
+Description: Move existing code to proper directories according to PROJECT_STRUCTURE.md. Create missing directories (src/game/, src/components/, src/hooks/, src/store/). Move hex utilities to remain in utils/, but create GameEngine in src/game/.
 Status: READY
 Blocked by: None
 Assigned to: Coding Agent
+Priority: HIGH
+Details:
+- Move game-specific logic from utils/ to game/
+- Keep hex.ts in utils/ (it's a generic utility)
+- Create hexGrid.ts wrapper in game/ that uses utils/hexGrid.ts
+- Set up proper module exports
+
+------
+
+Id: 19
+Title: Implement State Management Foundation
+Description: Set up state management system using Zustand or Context API. Create stores for GameState, UIState, and TemporalState. This is critical before implementing game loop.
+Status: BLOCKED
+Blocked by: Task 18
+Assigned to: Coding Agent
+Priority: HIGH
 
 ------
 
@@ -88,6 +121,11 @@ Description: Implement the bitemporal state system that stores the complete game
 Status: BLOCKED
 Blocked by: Tasks 3, 4
 Assigned to: Coding Agent
+Implementation Notes:
+- Use immutable data structures for state snapshots
+- Consider implementing state compression after 100 turns
+- Create efficient diff/patch system for state changes
+- Ensure serialization works for save/load functionality
 
 ------
 
@@ -146,6 +184,34 @@ Description: Design and implement the Ancient, Present, and Modern level archety
 Status: BLOCKED
 Blocked by: Tasks 6, 14
 Assigned to: Coding Agent
+
+------
+
+### Architecture Guidelines for Coding Agents
+
+**IMPORTANT**: When implementing any task, follow these guidelines:
+
+1. **Directory Structure**: Always place code in the correct directory:
+   - Game logic → src/game/
+   - React components → src/components/
+   - State management → src/store/
+   - Generic utilities → src/utils/
+   - Type definitions → src/types/
+
+2. **Separation of Concerns**:
+   - NEVER import React components into game logic
+   - NEVER put game logic directly in components
+   - Use the store layer to bridge game and UI
+
+3. **Testing Requirements**:
+   - Write tests BEFORE implementing complex logic
+   - Each module should have a corresponding test file
+   - Aim for >80% coverage on game logic
+
+4. **Performance Awareness**:
+   - Consider memory usage for bitemporal storage
+   - Profile before optimizing
+   - Document any performance-critical decisions
 
 ------
 

@@ -1,5 +1,17 @@
 ## Open Questions
 
+### URGENT: Architecture Alignment Issues
+
+**IMPORTANT**: The current code structure does not match the planned architecture in PROJECT_STRUCTURE.md. Before proceeding with more features:
+
+1. **Directory Structure Mismatch**: The `src/game/`, `src/components/`, `src/hooks/`, and `src/store/` directories are missing. Game logic is currently mixed with utilities.
+
+2. **State Management Missing**: No state management system has been implemented yet, which is critical for the bitemporal time travel mechanics.
+
+3. **Coupling Risk**: Without proper separation, UI and game logic may become tightly coupled, making it difficult for multiple agents to work independently.
+
+**Recommendation**: Complete Tasks 18 and 19 before implementing any new game features.
+
 ### Technical Architecture Questions
 
 1. **Bitemporal State Complexity**: How do we handle the memory requirements of storing complete game state at every turn, especially for long gameplay sessions? Should we implement state compression or periodic cleanup?
