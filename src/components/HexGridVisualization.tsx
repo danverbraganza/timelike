@@ -78,7 +78,10 @@ const HexagonTile: React.FC<{
     <g
       transform={`translate(${pixelPosition.x}, ${pixelPosition.y})`}
       style={{ cursor: 'pointer' }}
-      onClick={onClick}
+      onClick={() => {
+        console.log('TRACER BULLETS: Hexagon clicked at:', tile.position);
+        onClick?.();
+      }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
@@ -88,6 +91,7 @@ const HexagonTile: React.FC<{
         fill={fillColor}
         stroke={strokeColor}
         strokeWidth={strokeWidth}
+        style={{ pointerEvents: 'all' }}
       />
       
       {/* Character (simple circle) */}
@@ -99,6 +103,7 @@ const HexagonTile: React.FC<{
           fill={character.type === 'player' ? '#0000FF' : '#FF00FF'}
           stroke="#000000"
           strokeWidth={1}
+          style={{ pointerEvents: 'none' }}
         />
       )}
       
@@ -109,6 +114,7 @@ const HexagonTile: React.FC<{
           fill="#FFA500"
           stroke="#000000"
           strokeWidth={1}
+          style={{ pointerEvents: 'none' }}
         />
       )}
       

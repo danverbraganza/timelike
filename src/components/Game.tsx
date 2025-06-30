@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { HexGridVisualization } from './HexGridVisualization';
 import { useGameIntegration } from '../hooks/useGameIntegration';
 import { createSimpleTestLevel } from '../game/levelGenerator';
@@ -62,6 +62,9 @@ export const Game: React.FC = () => {
         console.log('Level tiles:', level.tiles.size);
         console.log('Player position:', player.position);
         console.log('Pizzas:', testPizzas.length);
+        console.log('Grid stats:', engine.getStats());
+        console.log('Characters in grid:', grid.getAllCharacters().length);
+        console.log('Characters state:', [player]);
         
       } catch (error) {
         console.error('TRACER BULLETS: Failed to initialize game:', error);
@@ -74,10 +77,17 @@ export const Game: React.FC = () => {
   }, [gameInitialized]); // Remove gameIntegration from dependencies to prevent infinite loop
 
   // TRACER BULLETS: Handle hex click for player movement
-  const handleHexClick = async (position: HexCoordinate) => {
-    if (!gameEngine || !gameInitialized) return;
-    
+  const handleHexClick = useCallback(async (position: HexCoordinate) => {
+    console.log('TRACER BULLETS: === HEX CLICK HANDLER CALLED ===');
     console.log('TRACER BULLETS: Hex clicked:', position);
+    console.log('TRACER BULLETS: Game engine exists:', !!gameEngine);
+    console.log('TRACER BULLETS: Game initialized:', gameInitialized);
+    console.log('TRACER BULLETS: Characters count:', characters.length);
+    
+    if (!gameEngine || !gameInitialized) {
+      console.log('TRACER BULLETS: Game not ready');
+      return;
+    }
     
     const grid = gameEngine.getGrid();
     const player = characters.find(c => c.type === 'player');
@@ -86,6 +96,9 @@ export const Game: React.FC = () => {
       console.log('TRACER BULLETS: No player found');
       return;
     }
+    
+    console.log('TRACER BULLETS: Current player position:', player.position);
+    console.log('TRACER BULLETS: Target position:', position);
     
     // Check if the clicked position is different from player's current position
     if (hexEquals(player.position, position)) {
@@ -105,13 +118,17 @@ export const Game: React.FC = () => {
       return;
     }
     
-    // Try to move the player
+    // TRACER BULLETS: Simple direct movement - bypass complex game integration for now
     try {
-      const success = await gameIntegration.moveCharacter(player.id, position);
-      if (success) {
-        console.log('TRACER BULLETS: Player moved successfully to:', position);
+      console.log('TRACER BULLETS: Attempting direct grid movement...');
+      
+      // Move in the game engine grid
+      const moveSuccess = grid.moveCharacter(player.id, position);
+      
+      if (moveSuccess) {
+        console.log('TRACER BULLETS: Grid movement successful');
         
-        // Update local character state
+        // Update local character state immediately
         setCharacters(prev => prev.map(char => 
           char.id === player.id 
             ? { ...char, position }
@@ -122,16 +139,18 @@ export const Game: React.FC = () => {
         const pizzaAtPosition = grid.getPizzaAt(position);
         if (pizzaAtPosition) {
           console.log('TRACER BULLETS: Player picked up pizza:', pizzaAtPosition.id);
+          grid.removePizza(pizzaAtPosition.id);
           setPizzas(prev => prev.filter(p => p.id !== pizzaAtPosition.id));
         }
         
+        console.log('TRACER BULLETS: Player moved successfully to:', position);
       } else {
-        console.log('TRACER BULLETS: Move failed (game logic prevented it)');
+        console.log('TRACER BULLETS: Grid movement failed');
       }
     } catch (error) {
       console.error('TRACER BULLETS: Error moving player:', error);
     }
-  };
+  }, [gameEngine, gameInitialized, characters]);
 
   // Show loading state
   if (!gameInitialized || !gameEngine) {
@@ -163,14 +182,18 @@ export const Game: React.FC = () => {
         <p><strong>Characters:</strong> {characters.length}</p>
         <p><strong>Pizzas:</strong> {pizzas.length}</p>
         <p><strong>Player Position:</strong> {characters[0] ? `(${characters[0].position.q}, ${characters[0].position.r})` : 'None'}</p>
-        <p><strong>Instructions:</strong> Click on any green hex to move the blue circle (player)</p>
+        <p><strong>Instructions:</strong> Click on any green hex to move the blue circle (player). Check console for debug info.</p>
+        <p><strong>Legend:</strong> 🔵 Blue circle = Player, 🟢 Green = Walkable grass, 🔷 Blue = Water, ⚫ Dark = Blocked</p>
       </div>
 
       <HexGridVisualization
         tiles={allTiles}
         characters={characters}
         pizzas={pizzas}
-        onHexClick={handleHexClick}
+        onHexClick={(position) => {
+          console.log('TRACER BULLETS: HexGridVisualization onHexClick called with:', position);
+          handleHexClick(position);
+        }}
         onHexHover={(hex) => gameIntegration.hoverHex(hex || undefined)}
         selectedHex={gameIntegration.selectedHex}
         hoveredHex={gameIntegration.hoveredHex}
