@@ -35,9 +35,11 @@ export interface Pizza extends Entity {
 
 // Tile types
 export const TileType = {
-  WALKABLE: 'walkable',
-  BLOCKED: 'blocked',
+  STONE: 'stone',
+  GRASS: 'grass', 
   WATER: 'water',
+  LAVA: 'lava',
+  BLOCKED: 'blocked',
   PIZZA_SPAWN: 'pizza_spawn',
   CHARACTER_SPAWN: 'character_spawn'
 } as const;

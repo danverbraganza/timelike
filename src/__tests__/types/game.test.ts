@@ -1,4 +1,5 @@
-import { HexCoordinate, PizzaType, TileType } from '../../types/game';
+import type { HexCoordinate } from '../../types/game';
+import { PizzaType, TileType } from '../../types/game';
 
 describe('Game Types', () => {
   describe('HexCoordinate', () => {
@@ -19,9 +20,11 @@ describe('Game Types', () => {
 
   describe('TileType', () => {
     it('should have all tile types defined', () => {
-      expect(TileType.WALKABLE).toBe('walkable');
-      expect(TileType.BLOCKED).toBe('blocked');
+      expect(TileType.STONE).toBe('stone');
+      expect(TileType.GRASS).toBe('grass');
       expect(TileType.WATER).toBe('water');
+      expect(TileType.LAVA).toBe('lava');
+      expect(TileType.BLOCKED).toBe('blocked');
       expect(TileType.PIZZA_SPAWN).toBe('pizza_spawn');
       expect(TileType.CHARACTER_SPAWN).toBe('character_spawn');
     });
