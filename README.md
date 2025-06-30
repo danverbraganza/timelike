@@ -90,6 +90,8 @@ coding agents can effectively collaborate on the design.
 * We will use React and a vite server to simplify the design.
 * Typescript will be used for type safety. Please ensure tests and typechecks
   always pass.
+* jest will be used to verify the tests of the system. Please adequately test
+  all significantly complex components.
 * Gameplay is more of an immediate priority than visual polish. To ensure we can
   rapidly replace the UI with something better, decouple game state and the main
   game loop from the user interface design.
