@@ -69,6 +69,27 @@ export interface TurnState {
   characters: Map<string, Character>;
   pizzas: Map<string, Pizza>;
   playerInventory?: Pizza;
+  tiles: Map<string, Tile>; // Dynamic tile states (e.g., water->ice)
+  timelineId: string; // Which timeline this turn belongs to
+  parentTurnNumber?: number; // For branched timelines
+}
+
+// Timeline represents a branch in the bitemporal history
+export interface Timeline {
+  id: string;
+  parentTimelineId?: string;
+  branchPoint?: number; // Turn number where this timeline branched
+  isPlayerControlled: boolean;
+  turns: Map<number, TurnState>; // Turn number -> state
+}
+
+// Bitemporal game state with multiple timelines
+export interface BitemporalGameState {
+  timelines: Map<string, Timeline>; // Timeline ID -> Timeline
+  activeTimelineId: string; // Currently player-controlled timeline
+  mergedState: TurnState; // Last-write-wins merged state
+  currentTurn: number;
+  isReversing: boolean; // Are we going backwards in time?
 }
 
 // Game state
@@ -78,8 +99,31 @@ export interface GameState {
   isTimeTraveling: boolean;
   activeTurnIndex: number; // which turn we're viewing/playing
   turnHistory: TurnState[];
+  bitemporalState?: BitemporalGameState;
   score: number;
   gameStatus: 'playing' | 'won' | 'lost' | 'cutscene';
+}
+
+// Event types for state changes
+export const StateChangeType = {
+  MOVE: 'move',
+  PICKUP: 'pickup',
+  DROP: 'drop',
+  USE_ITEM: 'use_item',
+  TILE_CHANGE: 'tile_change',
+  TIME_REVERSE: 'time_reverse'
+} as const;
+
+export type StateChangeType = typeof StateChangeType[keyof typeof StateChangeType];
+
+// Event for recording state changes
+export interface StateChangeEvent {
+  type: StateChangeType;
+  turnNumber: number;
+  timelineId: string;
+  entityId?: string;
+  data: any; // Type-specific data
+  timestamp: number;
 }
 
 // Cutscene

@@ -25,15 +25,10 @@ Completed: Complete hexagonal grid system implemented with HexGrid class, advanc
 Id: 3
 Title: Design Core Game State Architecture
 Description: Create the main game state structure that can handle bitemporal data (storing game state at each turn). Design interfaces for Game, Level, Character, Item, and Turn data structures.
-Status: BLOCKED
-Blocked by: Tasks 18, 19
+Status: COMPLETED
+Blocked by: None
 Assigned to: Coding Agent
-Architectural Requirements:
-- Create src/game/ directory structure
-- Implement GameEngine class to manage game state
-- Create TurnManager for turn-based logic
-- Design BitemporalStore for time travel mechanics
-- Keep all game logic separate from React components
+Completed: Implemented complete bitemporal game state architecture with BitemporalStore and GameStateManager classes. Supports multiple timelines, time reversal, ghost replay, last-write-wins state merging, dynamic tile changes (water->ice/steam), turn limits, win/lose conditions, and comprehensive event tracking. Includes 39 passing tests covering all edge cases.
 
 ------
 
@@ -42,7 +37,7 @@ Architectural Requirements:
 Id: 18
 Title: Refactor Code to Match Planned Architecture
 Description: Move existing code to proper directories according to PROJECT_STRUCTURE.md. Create missing directories (src/game/, src/components/, src/hooks/, src/store/). Move hex utilities to remain in utils/, but create GameEngine in src/game/.
-Status: READY
+Status: Done
 Blocked by: None
 Assigned to: Coding Agent
 Priority: HIGH
@@ -61,6 +56,7 @@ Status: BLOCKED
 Blocked by: Task 18
 Assigned to: Coding Agent
 Priority: HIGH
+=======
 
 ------
 

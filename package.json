@@ -14,8 +14,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@types/uuid": "^10.0.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
