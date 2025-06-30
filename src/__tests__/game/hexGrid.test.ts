@@ -1,4 +1,4 @@
-import { HexGrid, TILE_PROPERTIES } from '../../utils/hexGrid';
+import { HexGrid, TILE_PROPERTIES } from '../../game/hexGrid';
 import { createHex, hexEquals } from '../../utils/hex';
 import type { Character, Pizza } from '../../types/game';
 import { TileType, PizzaType } from '../../types/game';
