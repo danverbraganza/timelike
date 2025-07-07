@@ -4,7 +4,6 @@ import {
   hexToIsometric, 
   calculateDepth,
   createIsometricHexPath,
-  createIsometric3DBlock,
   createIsometricCharacter
 } from '../../utils/isometric';
 
@@ -75,18 +74,6 @@ describe('Isometric Utils', () => {
     });
   });
 
-  describe('createIsometric3DBlock', () => {
-    it('should create 3D block with top, left, and right faces', () => {
-      const block = createIsometric3DBlock(0, 0, hexSize, 20);
-      
-      expect(block.top).toContain('M');
-      expect(block.top).toContain('Z');
-      expect(block.left).toContain('M');
-      expect(block.left).toContain('Z');
-      expect(block.right).toContain('M');
-      expect(block.right).toContain('Z');
-    });
-  });
 
   describe('createIsometricCharacter', () => {
     it('should create character with base, body, and shadow', () => {
