@@ -30,6 +30,7 @@ export interface UIState {
   showCoordinates: boolean;
   showMovementRange: boolean;
   animationSpeed: 'slow' | 'normal' | 'fast';
+  isometricView: boolean;
 }
 
 // Actions for UI state
@@ -60,6 +61,7 @@ export interface UIActions {
   toggleCoordinates: () => void;
   toggleMovementRange: () => void;
   setAnimationSpeed: (speed: 'slow' | 'normal' | 'fast') => void;
+  toggleIsometricView: () => void;
 }
 
 // Combined UI store type

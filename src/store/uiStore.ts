@@ -24,6 +24,7 @@ export const useUIStore = create<UIStore>()(
       showCoordinates: false,
       showMovementRange: true,
       animationSpeed: 'normal',
+      isometricView: true, // Default to isometric view as requested
 
       // Modal actions
       togglePause: () => set((state) => ({ isPaused: !state.isPaused })),
@@ -85,6 +86,8 @@ export const useUIStore = create<UIStore>()(
       toggleMovementRange: () => set((state) => ({ showMovementRange: !state.showMovementRange })),
       
       setAnimationSpeed: (speed) => set({ animationSpeed: speed }),
+      
+      toggleIsometricView: () => set((state) => ({ isometricView: !state.isometricView })),
     }),
     {
       name: 'ui-store',
@@ -94,6 +97,7 @@ export const useUIStore = create<UIStore>()(
         showCoordinates: state.showCoordinates,
         showMovementRange: state.showMovementRange,
         animationSpeed: state.animationSpeed,
+        isometricView: state.isometricView,
       }),
     }
   )
