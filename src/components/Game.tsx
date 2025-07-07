@@ -28,10 +28,10 @@ export const Game: React.FC = () => {
         
         // Create a simple test level using procedural generation
         const { level, player, pizzas: testPizzas } = createSimpleTestLevel({
-          width: 10,
-          height: 8,
-          algorithm: 'perlin', // Try 'perlin', 'cellular', or 'simple'
-          seed: 12345,
+          width: 14,
+          height: 12,
+          algorithm: 'hybrid', // Try 'perlin', 'cellular', 'simple', or 'hybrid'
+          seed: 42,
         });
         
         // Create game engine
@@ -41,8 +41,11 @@ export const Game: React.FC = () => {
           defaultTileType: 'grass',
         });
         
-        // Add player to the grid
+        // Set the procedurally generated tiles
         const grid = engine.getGrid();
+        grid.setTiles(level.tiles);
+        
+        // Add player to the grid
         grid.addCharacter(player);
         
         // Add pizzas to the grid

@@ -267,6 +267,194 @@ export class SimpleRandomGenerator extends LevelGenerationAlgorithm {
 }
 
 /**
+ * Hybrid Algorithm - combines multiple techniques for interesting levels
+ * Uses cellular automata for base structure, perlin noise for variation,
+ * and strategic placement for special features
+ */
+export class HybridGenerator extends LevelGenerationAlgorithm {
+  private cellularGenerator: CellularAutomataGenerator;
+  private perlinGenerator: PerlinNoiseGenerator;
+  
+  constructor(config: LevelGenerationConfig) {
+    super(config);
+    
+    // Create sub-generators with modified parameters
+    this.cellularGenerator = new CellularAutomataGenerator({
+      ...config,
+      parameters: {
+        ...config.parameters,
+        initialDensity: 0.35,
+        smoothingIterations: 2,
+      }
+    });
+    
+    this.perlinGenerator = new PerlinNoiseGenerator({
+      ...config,
+      parameters: {
+        ...config.parameters,
+        scale: 0.2,
+        octaves: 2,
+        persistence: 0.3,
+      }
+    });
+  }
+  
+  generate(width: number, height: number): Map<string, Tile> {
+    // Step 1: Generate base structure with cellular automata
+    const cellularTiles = this.cellularGenerator.generate(width, height);
+    
+    // Step 2: Add variation with perlin noise
+    const perlinTiles = this.perlinGenerator.generate(width, height);
+    
+    // Step 3: Combine both approaches
+    const tiles = new Map<string, Tile>();
+    
+    for (let q = 0; q < width; q++) {
+      const qOffset = Math.floor(q / 2);
+      for (let r = -qOffset; r < height - qOffset; r++) {
+        const position = createHex(q, r);
+        const key = hexToKey(position);
+        
+        const cellularTile = cellularTiles.get(key);
+        const perlinTile = perlinTiles.get(key);
+        
+        if (!cellularTile || !perlinTile) continue;
+        
+        // Combine the two approaches
+        const finalTileType = this.combineAlgorithms(
+          cellularTile.type,
+          perlinTile.type,
+          position,
+          width,
+          height
+        );
+        
+        tiles.set(key, {
+          position,
+          type: finalTileType,
+        });
+      }
+    }
+    
+    // Step 4: Add special features
+    this.addSpecialFeatures(tiles, width, height);
+    
+    return tiles;
+  }
+  
+  private combineAlgorithms(
+    cellularType: TileType,
+    perlinType: TileType,
+    position: HexCoordinate,
+    width: number,
+    _height: number
+  ): TileType {
+    // Use cellular automata for structural elements
+    if (cellularType === TileTypeEnum.STONE || cellularType === TileTypeEnum.STEEL) {
+      return cellularType;
+    }
+    
+    // Use perlin noise for natural variation in open areas
+    if (cellularType === TileTypeEnum.DIRT || cellularType === TileTypeEnum.GRASS) {
+      // Add some perlin influence
+      const blendFactor = this.random();
+      if (blendFactor < 0.3) {
+        return perlinType;
+      }
+    }
+    
+    // Special edge cases
+    const distanceFromCenter = Math.abs(position.q - Math.floor(width / 2)) + Math.abs(position.r);
+    if (distanceFromCenter > width * 0.4) {
+      // Outer edges tend to be more varied
+      return this.random() < 0.5 ? cellularType : perlinType;
+    }
+    
+    return cellularType;
+  }
+  
+  private addSpecialFeatures(tiles: Map<string, Tile>, width: number, height: number): void {
+    // Add water features (small lakes)
+    this.addWaterFeatures(tiles, width, height);
+    
+    // Add lava patches for interesting gameplay
+    this.addLavaPatches(tiles, width, height);
+    
+    // Add sand paths for visual variety
+    this.addSandPaths(tiles, width, height);
+  }
+  
+  private addWaterFeatures(tiles: Map<string, Tile>, width: number, height: number): void {
+    const numWaterFeatures = Math.floor(width * height * 0.02); // 2% of tiles
+    
+    for (let i = 0; i < numWaterFeatures; i++) {
+      const centerQ = Math.floor(this.random() * width);
+      const centerR = Math.floor(this.random() * height) - Math.floor(centerQ / 2);
+      const center = createHex(centerQ, centerR);
+      
+      // Create small water clusters
+      const waterRadius = 1 + Math.floor(this.random() * 2);
+      const waterTiles = hexRange(center, waterRadius);
+      
+      waterTiles.forEach(pos => {
+        const key = hexToKey(pos);
+        if (tiles.has(key)) {
+          const tile = tiles.get(key)!;
+          // Only place water on grass or dirt
+          if (tile.type === TileTypeEnum.GRASS || tile.type === TileTypeEnum.DIRT) {
+            tiles.set(key, { position: pos, type: TileTypeEnum.WATER });
+          }
+        }
+      });
+    }
+  }
+  
+  private addLavaPatches(tiles: Map<string, Tile>, width: number, height: number): void {
+    const numLavaPatches = Math.floor(width * height * 0.01); // 1% of tiles
+    
+    for (let i = 0; i < numLavaPatches; i++) {
+      const centerQ = Math.floor(this.random() * width);
+      const centerR = Math.floor(this.random() * height) - Math.floor(centerQ / 2);
+      const center = createHex(centerQ, centerR);
+      
+      // Create small lava patches
+      const lavaRadius = Math.floor(this.random() * 2);
+      const lavaTiles = hexRange(center, lavaRadius);
+      
+      lavaTiles.forEach(pos => {
+        const key = hexToKey(pos);
+        if (tiles.has(key)) {
+          const tile = tiles.get(key)!;
+          // Only place lava on stone or steel
+          if (tile.type === TileTypeEnum.STONE || tile.type === TileTypeEnum.STEEL) {
+            tiles.set(key, { position: pos, type: TileTypeEnum.LAVA });
+          }
+        }
+      });
+    }
+  }
+  
+  private addSandPaths(tiles: Map<string, Tile>, width: number, height: number): void {
+    const numSandPaths = Math.floor(width * height * 0.015); // 1.5% of tiles
+    
+    for (let i = 0; i < numSandPaths; i++) {
+      const centerQ = Math.floor(this.random() * width);
+      const centerR = Math.floor(this.random() * height) - Math.floor(centerQ / 2);
+      const center = createHex(centerQ, centerR);
+      
+      const key = hexToKey(center);
+      if (tiles.has(key)) {
+        const tile = tiles.get(key)!;
+        // Only place sand on grass or dirt
+        if (tile.type === TileTypeEnum.GRASS || tile.type === TileTypeEnum.DIRT) {
+          tiles.set(key, { position: center, type: TileTypeEnum.SAND });
+        }
+      }
+    }
+  }
+}
+
+/**
  * Main Level Generator class that coordinates different algorithms
  */
 export class ProceduralLevelGenerator {
@@ -277,6 +465,7 @@ export class ProceduralLevelGenerator {
       ['perlin', PerlinNoiseGenerator],
       ['cellular', CellularAutomataGenerator],
       ['simple', SimpleRandomGenerator],
+      ['hybrid', HybridGenerator],
     ]);
   }
   
@@ -404,7 +593,7 @@ export function createLevelGenerator(): ProceduralLevelGenerator {
 export function createSimpleTestLevel(options: {
   width?: number;
   height?: number;
-  algorithm?: 'perlin' | 'cellular' | 'simple';
+  algorithm?: 'perlin' | 'cellular' | 'simple' | 'hybrid';
   seed?: number;
 } = {}): {
   level: Level;
@@ -414,7 +603,7 @@ export function createSimpleTestLevel(options: {
   const {
     width = 10,
     height = 8,
-    algorithm = 'simple',
+    algorithm = 'hybrid',
     seed = 12345,
   } = options;
   

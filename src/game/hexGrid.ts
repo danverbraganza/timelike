@@ -294,6 +294,11 @@ export class HexGrid {
     return { width: this.width, height: this.height };
   }
 
+  // Replace all tiles with new tiles from procedural generation
+  setTiles(tiles: Map<string, Tile>): void {
+    this.tiles = new Map(tiles);
+  }
+
   // Generate grid statistics
   getGridStats(): { 
     totalTiles: number; 

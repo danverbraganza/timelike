@@ -57,7 +57,7 @@ export interface Tile {
 
 // Level generation parameters
 export interface LevelGenerationConfig {
-  algorithm: 'perlin' | 'cellular' | 'simple';
+  algorithm: 'perlin' | 'cellular' | 'simple' | 'hybrid';
   seed?: number;
   parameters?: {
     // Perlin noise parameters
