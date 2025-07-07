@@ -27,6 +27,10 @@ const getTileColor = (tileType: TileType): string => {
     case TileType.STONE: return '#808080';
     case TileType.WATER: return '#4169E1';
     case TileType.LAVA: return '#FF4500';
+    case TileType.SAND: return '#F4A460';
+    case TileType.DIRT: return '#8B4513';
+    case TileType.STEEL: return '#B0C4DE';
+    case TileType.VOID: return '#000000';
     case TileType.BLOCKED: return '#2F2F2F';
     case TileType.PIZZA_SPAWN: return '#FFD700';
     case TileType.CHARACTER_SPAWN: return '#98FB98';

@@ -25,6 +25,10 @@ export const TILE_PROPERTIES: Record<TileType, TileProperties> = {
   [TileType.GRASS]: { walkable: true, swimmingRequired: false, movementCost: 1 },
   [TileType.WATER]: { walkable: true, swimmingRequired: true, movementCost: 2 },
   [TileType.LAVA]: { walkable: true, swimmingRequired: false, damagePerTurn: 1, movementCost: 2 },
+  [TileType.SAND]: { walkable: true, swimmingRequired: false, movementCost: 1 },
+  [TileType.DIRT]: { walkable: true, swimmingRequired: false, movementCost: 1 },
+  [TileType.STEEL]: { walkable: true, swimmingRequired: false, movementCost: 1 },
+  [TileType.VOID]: { walkable: false, swimmingRequired: false, movementCost: Infinity },
   [TileType.BLOCKED]: { walkable: false, swimmingRequired: false, movementCost: Infinity },
   [TileType.PIZZA_SPAWN]: { walkable: true, swimmingRequired: false, movementCost: 1 },
   [TileType.CHARACTER_SPAWN]: { walkable: true, swimmingRequired: false, movementCost: 1 }

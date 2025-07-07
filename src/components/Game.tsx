@@ -26,12 +26,12 @@ export const Game: React.FC = () => {
       try {
         console.log('TRACER BULLETS: Initializing test game...');
         
-        // Create a simple test level
+        // Create a simple test level using procedural generation
         const { level, player, pizzas: testPizzas } = createSimpleTestLevel({
           width: 10,
           height: 8,
-          addObstacles: true,
-          addPizzas: true,
+          algorithm: 'perlin', // Try 'perlin', 'cellular', or 'simple'
+          seed: 12345,
         });
         
         // Create game engine
@@ -183,7 +183,7 @@ export const Game: React.FC = () => {
         <p><strong>Pizzas:</strong> {pizzas.length}</p>
         <p><strong>Player Position:</strong> {characters[0] ? `(${characters[0].position.q}, ${characters[0].position.r})` : 'None'}</p>
         <p><strong>Instructions:</strong> Click on any green hex to move the blue circle (player). Check console for debug info.</p>
-        <p><strong>Legend:</strong> 🔵 Blue circle = Player, 🟢 Green = Walkable grass, 🔷 Blue = Water, ⚫ Dark = Blocked</p>
+        <p><strong>Legend:</strong> 🔵 Blue circle = Player, 🟢 Green = Grass, 🔷 Blue = Water, 🔴 Red = Lava, 🟤 Brown = Dirt, 🟡 Yellow = Sand, 🔘 Steel = Steel, ⚫ Black = Void, ⚫ Dark = Blocked</p>
       </div>
 
       <HexGridVisualization

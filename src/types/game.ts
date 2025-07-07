@@ -39,6 +39,10 @@ export const TileType = {
   GRASS: 'grass', 
   WATER: 'water',
   LAVA: 'lava',
+  SAND: 'sand',
+  DIRT: 'dirt',
+  STEEL: 'steel',
+  VOID: 'void',
   BLOCKED: 'blocked',
   PIZZA_SPAWN: 'pizza_spawn',
   CHARACTER_SPAWN: 'character_spawn'
@@ -51,6 +55,27 @@ export interface Tile {
   type: TileType;
 }
 
+// Level generation parameters
+export interface LevelGenerationConfig {
+  algorithm: 'perlin' | 'cellular' | 'simple';
+  seed?: number;
+  parameters?: {
+    // Perlin noise parameters
+    scale?: number;
+    octaves?: number;
+    persistence?: number;
+    lacunarity?: number;
+    
+    // Cellular automata parameters
+    initialDensity?: number;
+    smoothingIterations?: number;
+    
+    // Common parameters
+    biomeWeights?: Record<TileType, number>;
+    spawnSafety?: number; // radius around spawns that must be walkable
+  };
+}
+
 // Level structure
 export interface Level {
   id: number;
@@ -60,6 +85,7 @@ export interface Level {
   tiles: Map<string, Tile>; // key is "q,r"
   timeLimit?: number; // in turns, undefined for infinite time
   isStatic: boolean; // true for levels 1, 5, 10, 15, 20, 25, 30
+  generationConfig?: LevelGenerationConfig; // for procedurally generated levels
 }
 
 // Turn data for bitemporal storage
