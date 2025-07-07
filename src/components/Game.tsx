@@ -8,13 +8,6 @@ import { GameEngine } from '../game/GameEngine';
 import type { HexCoordinate, Character, Pizza } from '../types/game';
 import { hexEquals } from '../utils/hex';
 
-/**
- * TRACER BULLETS / JIG CODE - This is temporary game component
- * TODO: This should be refactored into proper game UI system
- * with better separation of concerns, proper state management,
- * and real game features when building the actual game
- */
-
 export const Game: React.FC = () => {
   const gameIntegration = useGameIntegration();
   const { isometricView, toggleIsometricView } = useUIStore();
@@ -23,17 +16,15 @@ export const Game: React.FC = () => {
   const [pizzas, setPizzas] = useState<Pizza[]>([]);
   const [gameInitialized, setGameInitialized] = useState(false);
 
-  // TRACER BULLETS: Initialize the game when component mounts
+  // Initialize the game when component mounts
   useEffect(() => {
     const initializeGame = async () => {
       try {
-        console.log('TRACER BULLETS: Initializing test game...');
-        
         // Create a simple test level using procedural generation
         const { level, player, pizzas: testPizzas } = createSimpleTestLevel({
           width: 14,
           height: 12,
-          algorithm: 'hybrid', // Try 'perlin', 'cellular', 'simple', or 'hybrid'
+          algorithm: 'hybrid',
           seed: 42,
         });
         
@@ -64,34 +55,19 @@ export const Game: React.FC = () => {
         setPizzas(testPizzas);
         setGameInitialized(true);
         
-        console.log('TRACER BULLETS: Game initialized successfully!');
-        console.log('Level tiles:', level.tiles.size);
-        console.log('Player position:', player.position);
-        console.log('Pizzas:', testPizzas.length);
-        console.log('Grid stats:', engine.getStats());
-        console.log('Characters in grid:', grid.getAllCharacters().length);
-        console.log('Characters state:', [player]);
-        
       } catch (error) {
-        console.error('TRACER BULLETS: Failed to initialize game:', error);
+        console.error('Failed to initialize game:', error);
       }
     };
 
     if (!gameInitialized) {
       initializeGame();
     }
-  }, [gameInitialized]); // Remove gameIntegration from dependencies to prevent infinite loop
+  }, [gameInitialized]);
 
-  // TRACER BULLETS: Handle hex click for player movement
+  // Handle hex click for player movement
   const handleHexClick = useCallback(async (position: HexCoordinate) => {
-    console.log('TRACER BULLETS: === HEX CLICK HANDLER CALLED ===');
-    console.log('TRACER BULLETS: Hex clicked:', position);
-    console.log('TRACER BULLETS: Game engine exists:', !!gameEngine);
-    console.log('TRACER BULLETS: Game initialized:', gameInitialized);
-    console.log('TRACER BULLETS: Characters count:', characters.length);
-    
     if (!gameEngine || !gameInitialized) {
-      console.log('TRACER BULLETS: Game not ready');
       return;
     }
     
@@ -99,41 +75,29 @@ export const Game: React.FC = () => {
     const player = characters.find(c => c.type === 'player');
     
     if (!player) {
-      console.log('TRACER BULLETS: No player found');
       return;
     }
     
-    console.log('TRACER BULLETS: Current player position:', player.position);
-    console.log('TRACER BULLETS: Target position:', position);
-    
     // Check if the clicked position is different from player's current position
     if (hexEquals(player.position, position)) {
-      console.log('TRACER BULLETS: Player already at this position');
       return;
     }
     
     // Check if the position is walkable
     if (!grid.isTileWalkable(position)) {
-      console.log('TRACER BULLETS: Position not walkable');
       return;
     }
     
     // Check if there's already a character at the position
     if (grid.getCharacterAt(position)) {
-      console.log('TRACER BULLETS: Position occupied by another character');
       return;
     }
     
-    // TRACER BULLETS: Simple direct movement - bypass complex game integration for now
+    // Move in the game engine grid
     try {
-      console.log('TRACER BULLETS: Attempting direct grid movement...');
-      
-      // Move in the game engine grid
       const moveSuccess = grid.moveCharacter(player.id, position);
       
       if (moveSuccess) {
-        console.log('TRACER BULLETS: Grid movement successful');
-        
         // Update local character state immediately
         setCharacters(prev => prev.map(char => 
           char.id === player.id 
@@ -144,26 +108,32 @@ export const Game: React.FC = () => {
         // Check if player picked up a pizza
         const pizzaAtPosition = grid.getPizzaAt(position);
         if (pizzaAtPosition) {
-          console.log('TRACER BULLETS: Player picked up pizza:', pizzaAtPosition.id);
           grid.removePizza(pizzaAtPosition.id);
           setPizzas(prev => prev.filter(p => p.id !== pizzaAtPosition.id));
         }
-        
-        console.log('TRACER BULLETS: Player moved successfully to:', position);
-      } else {
-        console.log('TRACER BULLETS: Grid movement failed');
       }
     } catch (error) {
-      console.error('TRACER BULLETS: Error moving player:', error);
+      console.error('Error moving player:', error);
     }
   }, [gameEngine, gameInitialized, characters]);
 
   // Show loading state
   if (!gameInitialized || !gameEngine) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center' }}>
-        <h2>TRACER BULLETS - Loading Game...</h2>
-        <p>Initializing hex grid and game state...</p>
+      <div style={{ 
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#1a1a1a',
+        color: 'white',
+        fontSize: '1.2em'
+      }}>
+        Loading Game...
       </div>
     );
   }
@@ -172,89 +142,85 @@ export const Game: React.FC = () => {
   const allTiles = grid.getAllTiles();
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>TRACER BULLETS - Timelike Game Visualization</h1>
-      
-      <div style={{ 
-        background: '#f0f0f0', 
-        padding: '15px', 
-        marginBottom: '20px',
-        border: '1px solid #ddd',
-        borderRadius: '5px'
+    <div style={{ 
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      overflow: 'hidden',
+      backgroundColor: '#1a1a1a'
+    }}>
+      {/* Game View - Full Screen */}
+      <div style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
       }}>
-        <h3>🔧 Debug Information (TRACER BULLETS)</h3>
-        <p><strong>Game Status:</strong> {gameInitialized ? 'Initialized' : 'Loading'}</p>
-        <p><strong>Total Tiles:</strong> {allTiles.length}</p>
-        <p><strong>Characters:</strong> {characters.length}</p>
-        <p><strong>Pizzas:</strong> {pizzas.length}</p>
-        <p><strong>Player Position:</strong> {characters[0] ? `(${characters[0].position.q}, ${characters[0].position.r})` : 'None'}</p>
-        <p><strong>View Mode:</strong> {isometricView ? 'Isometric 3D' : 'Flat 2D'}</p>
-        <p><strong>Instructions:</strong> Click on any hex to move the player. Use the view toggle to switch between 2D and 3D modes.</p>
-        <p><strong>Legend:</strong> 🔵 Blue = Player, 🟢 Green = Grass, 🔷 Blue = Water, 🔴 Red = Lava, 🟤 Brown = Dirt, 🟡 Yellow = Sand, 🔘 Steel = Steel, ⚫ Black = Void, ⚫ Dark = Blocked</p>
-        
-        {/* View Mode Toggle */}
-        <div style={{ marginTop: '10px' }}>
-          <button 
-            onClick={toggleIsometricView}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: isometricView ? '#007bff' : '#28a745',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: 'bold'
-            }}
-          >
-            {isometricView ? '🎮 Switch to Flat View' : '✨ Switch to Isometric View'}
-          </button>
-        </div>
+        {isometricView ? (
+          <IsometricHexGridVisualization
+            tiles={allTiles}
+            characters={characters}
+            pizzas={pizzas}
+            onHexClick={handleHexClick}
+            onHexHover={(hex) => gameIntegration.hoverHex(hex || undefined)}
+            selectedHex={gameIntegration.selectedHex}
+            hoveredHex={gameIntegration.hoveredHex}
+            hexSize={35}
+          />
+        ) : (
+          <HexGridVisualization
+            tiles={allTiles}
+            characters={characters}
+            pizzas={pizzas}
+            onHexClick={handleHexClick}
+            onHexHover={(hex) => gameIntegration.hoverHex(hex || undefined)}
+            selectedHex={gameIntegration.selectedHex}
+            hoveredHex={gameIntegration.hoveredHex}
+            hexSize={35}
+          />
+        )}
       </div>
 
-      {/* Conditional rendering based on view mode */}
-      {isometricView ? (
-        <IsometricHexGridVisualization
-          tiles={allTiles}
-          characters={characters}
-          pizzas={pizzas}
-          onHexClick={(position) => {
-            console.log('TRACER BULLETS: IsometricHexGridVisualization onHexClick called with:', position);
-            handleHexClick(position);
-          }}
-          onHexHover={(hex) => gameIntegration.hoverHex(hex || undefined)}
-          selectedHex={gameIntegration.selectedHex}
-          hoveredHex={gameIntegration.hoveredHex}
-          hexSize={35}
-        />
-      ) : (
-        <HexGridVisualization
-          tiles={allTiles}
-          characters={characters}
-          pizzas={pizzas}
-          onHexClick={(position) => {
-            console.log('TRACER BULLETS: HexGridVisualization onHexClick called with:', position);
-            handleHexClick(position);
-          }}
-          onHexHover={(hex) => gameIntegration.hoverHex(hex || undefined)}
-          selectedHex={gameIntegration.selectedHex}
-          hoveredHex={gameIntegration.hoveredHex}
-          hexSize={35}
-        />
-      )}
-      
-      <div style={{ 
-        marginTop: '20px', 
-        fontSize: '12px', 
-        color: '#666',
-        background: '#fff3cd',
-        padding: '10px',
-        border: '1px solid #ffeaa7',
-        borderRadius: '5px'
+      {/* Translucent Toolbar Overlay */}
+      <div style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        backdropFilter: 'blur(10px)',
+        padding: '16px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
       }}>
-        <strong>🚧 TRACER BULLETS Code Notice:</strong> This is temporary visualization code 
-        for immediate feedback. All components here are marked for refactoring once 
-        the basic gameplay loop is validated.
+        <button 
+          onClick={toggleIsometricView}
+          style={{
+            padding: '12px 24px',
+            backgroundColor: isometricView ? 'rgba(0, 123, 255, 0.8)' : 'rgba(40, 167, 69, 0.8)',
+            color: 'white',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            transition: 'all 0.3s ease',
+            backdropFilter: 'blur(5px)'
+          }}
+          onMouseEnter={(e) => {
+            (e.target as HTMLButtonElement).style.backgroundColor = isometricView ? 'rgba(0, 123, 255, 1)' : 'rgba(40, 167, 69, 1)';
+          }}
+          onMouseLeave={(e) => {
+            (e.target as HTMLButtonElement).style.backgroundColor = isometricView ? 'rgba(0, 123, 255, 0.8)' : 'rgba(40, 167, 69, 0.8)';
+          }}
+        >
+          {isometricView ? '🎮 Switch to Flat View' : '✨ Switch to 3D View'}
+        </button>
       </div>
     </div>
   );

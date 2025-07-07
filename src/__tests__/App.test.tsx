@@ -5,7 +5,7 @@ describe('App', () => {
   it('renders without crashing', () => {
     render(<App />);
     // Look for the game loading text instead
-    const gameElement = screen.getByText(/TRACER BULLETS - Loading Game/i);
+    const gameElement = screen.getByText(/Loading Game\.\.\./i);
     expect(gameElement).toBeInTheDocument();
   });
 });

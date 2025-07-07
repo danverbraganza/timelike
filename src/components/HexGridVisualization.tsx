@@ -4,9 +4,8 @@ import { TileType } from '../types/game';
 import { hexToPixel } from '../utils/hex';
 
 /**
- * TRACER BULLETS / JIG CODE - This is temporary visualization code
- * TODO: This should be refactored into proper components with better styling
- * and separated concerns when we build the real UI system
+ * Hex Grid Visualization Component
+ * Renders a flat 2D hex grid with game tiles, characters, and pizzas
  */
 
 interface HexGridVisualizationProps {
@@ -83,7 +82,6 @@ const HexagonTile: React.FC<{
       transform={`translate(${pixelPosition.x}, ${pixelPosition.y})`}
       style={{ cursor: 'pointer' }}
       onClick={() => {
-        console.log('TRACER BULLETS: Hexagon clicked at:', tile.position);
         onClick?.();
       }}
       onMouseEnter={onMouseEnter}
@@ -122,17 +120,6 @@ const HexagonTile: React.FC<{
         />
       )}
       
-      {/* TRACER BULLETS: Debug coordinate text */}
-      <text
-        x={0}
-        y={hexSize * 0.6}
-        textAnchor="middle"
-        fontSize={hexSize * 0.15}
-        fill="#000000"
-        style={{ pointerEvents: 'none', fontFamily: 'monospace' }}
-      >
-        {tile.position.q},{tile.position.r}
-      </text>
     </g>
   );
 };
@@ -159,12 +146,7 @@ export const HexGridVisualization: React.FC<HexGridVisualizationProps> = ({
   const offsetY = -minY + hexSize;
 
   return (
-    <div style={{ border: '2px solid #ccc', margin: '20px', padding: '20px' }}>
-      <h3>TRACER BULLETS - Hex Grid Visualization</h3>
-      <p style={{ fontSize: '12px', color: '#666' }}>
-        This is temporary visualization code. Click hexes to move player.
-      </p>
-      
+    <div style={{ width: '100%', height: '100%' }}>
       <svg
         width={width}
         height={height}
