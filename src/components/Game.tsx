@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { HexGridVisualization } from './HexGridVisualization';
+import { IsometricHexGridVisualization } from './IsometricHexGridVisualization';
 import { useGameIntegration } from '../hooks/useGameIntegration';
+import { useUIStore } from '../store/uiStore';
 import { createSimpleTestLevel } from '../game/levelGenerator';
 import { GameEngine } from '../game/GameEngine';
 import type { HexCoordinate, Character, Pizza } from '../types/game';
@@ -15,6 +17,7 @@ import { hexEquals } from '../utils/hex';
 
 export const Game: React.FC = () => {
   const gameIntegration = useGameIntegration();
+  const { isometricView, toggleIsometricView } = useUIStore();
   const [gameEngine, setGameEngine] = useState<GameEngine | null>(null);
   const [characters, setCharacters] = useState<Character[]>([]);
   const [pizzas, setPizzas] = useState<Pizza[]>([]);
@@ -182,23 +185,60 @@ export const Game: React.FC = () => {
         <p><strong>Characters:</strong> {characters.length}</p>
         <p><strong>Pizzas:</strong> {pizzas.length}</p>
         <p><strong>Player Position:</strong> {characters[0] ? `(${characters[0].position.q}, ${characters[0].position.r})` : 'None'}</p>
-        <p><strong>Instructions:</strong> Click on any green hex to move the blue circle (player). Check console for debug info.</p>
-        <p><strong>Legend:</strong> 🔵 Blue circle = Player, 🟢 Green = Grass, 🔷 Blue = Water, 🔴 Red = Lava, 🟤 Brown = Dirt, 🟡 Yellow = Sand, 🔘 Steel = Steel, ⚫ Black = Void, ⚫ Dark = Blocked</p>
+        <p><strong>View Mode:</strong> {isometricView ? 'Isometric 3D' : 'Flat 2D'}</p>
+        <p><strong>Instructions:</strong> Click on any hex to move the player. Use the view toggle to switch between 2D and 3D modes.</p>
+        <p><strong>Legend:</strong> 🔵 Blue = Player, 🟢 Green = Grass, 🔷 Blue = Water, 🔴 Red = Lava, 🟤 Brown = Dirt, 🟡 Yellow = Sand, 🔘 Steel = Steel, ⚫ Black = Void, ⚫ Dark = Blocked</p>
+        
+        {/* View Mode Toggle */}
+        <div style={{ marginTop: '10px' }}>
+          <button 
+            onClick={toggleIsometricView}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: isometricView ? '#007bff' : '#28a745',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: 'bold'
+            }}
+          >
+            {isometricView ? '🎮 Switch to Flat View' : '✨ Switch to Isometric View'}
+          </button>
+        </div>
       </div>
 
-      <HexGridVisualization
-        tiles={allTiles}
-        characters={characters}
-        pizzas={pizzas}
-        onHexClick={(position) => {
-          console.log('TRACER BULLETS: HexGridVisualization onHexClick called with:', position);
-          handleHexClick(position);
-        }}
-        onHexHover={(hex) => gameIntegration.hoverHex(hex || undefined)}
-        selectedHex={gameIntegration.selectedHex}
-        hoveredHex={gameIntegration.hoveredHex}
-        hexSize={35}
-      />
+      {/* Conditional rendering based on view mode */}
+      {isometricView ? (
+        <IsometricHexGridVisualization
+          tiles={allTiles}
+          characters={characters}
+          pizzas={pizzas}
+          onHexClick={(position) => {
+            console.log('TRACER BULLETS: IsometricHexGridVisualization onHexClick called with:', position);
+            handleHexClick(position);
+          }}
+          onHexHover={(hex) => gameIntegration.hoverHex(hex || undefined)}
+          selectedHex={gameIntegration.selectedHex}
+          hoveredHex={gameIntegration.hoveredHex}
+          hexSize={35}
+        />
+      ) : (
+        <HexGridVisualization
+          tiles={allTiles}
+          characters={characters}
+          pizzas={pizzas}
+          onHexClick={(position) => {
+            console.log('TRACER BULLETS: HexGridVisualization onHexClick called with:', position);
+            handleHexClick(position);
+          }}
+          onHexHover={(hex) => gameIntegration.hoverHex(hex || undefined)}
+          selectedHex={gameIntegration.selectedHex}
+          hoveredHex={gameIntegration.hoveredHex}
+          hexSize={35}
+        />
+      )}
       
       <div style={{ 
         marginTop: '20px', 
