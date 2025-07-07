@@ -3,8 +3,8 @@ import type { HexCoordinate, Tile, Character, Pizza } from '../types/game';
 import { TileType } from '../types/game';
 import { 
   hexToIsometric, 
-  createIsometric3DBlock, 
   createIsometricCharacter, 
+  createIsometricHexPath,
   calculateDepth 
 } from '../utils/isometric';
 
@@ -24,42 +24,41 @@ interface IsometricHexGridVisualizationProps {
   hexSize?: number;
 }
 
-// Mystic/neon color palette for tiles
+// Mystic/neon color palette for tiles - all tiles at same height
 const getTileStyle = (tileType: TileType): { 
   color: string; 
   glowColor: string; 
-  height: number; 
   opacity: number 
 } => {
   switch (tileType) {
     case TileType.GRASS:
-      return { color: '#00ff88', glowColor: '#00ff88', height: 0, opacity: 0.8 };
+      return { color: '#00ff88', glowColor: '#44ffaa', opacity: 0.8 };
     case TileType.STONE:
-      return { color: '#8888ff', glowColor: '#4444ff', height: 15, opacity: 0.9 };
+      return { color: '#8888ff', glowColor: '#aaaaff', opacity: 0.9 };
     case TileType.WATER:
-      return { color: '#00ccff', glowColor: '#00ccff', height: -5, opacity: 0.7 };
+      return { color: '#00ccff', glowColor: '#44ddff', opacity: 0.7 };
     case TileType.LAVA:
-      return { color: '#ff3300', glowColor: '#ff6600', height: 5, opacity: 0.9 };
+      return { color: '#ff3300', glowColor: '#ff8844', opacity: 0.9 };
     case TileType.SAND:
-      return { color: '#ffcc00', glowColor: '#ffdd44', height: 0, opacity: 0.8 };
+      return { color: '#ffcc00', glowColor: '#ffdd44', opacity: 0.8 };
     case TileType.DIRT:
-      return { color: '#cc8844', glowColor: '#dd9955', height: 0, opacity: 0.8 };
+      return { color: '#cc8844', glowColor: '#dd9955', opacity: 0.8 };
     case TileType.STEEL:
-      return { color: '#ccccff', glowColor: '#aaaaff', height: 20, opacity: 0.9 };
+      return { color: '#ccccff', glowColor: '#ddddff', opacity: 0.9 };
     case TileType.VOID:
-      return { color: '#330033', glowColor: '#660066', height: -20, opacity: 0.6 };
+      return { color: '#330033', glowColor: '#660066', opacity: 0.6 };
     case TileType.BLOCKED:
-      return { color: '#ff0044', glowColor: '#ff4477', height: 25, opacity: 0.9 };
+      return { color: '#ff0044', glowColor: '#ff4477', opacity: 0.9 };
     case TileType.PIZZA_SPAWN:
-      return { color: '#ffff00', glowColor: '#ffff44', height: 5, opacity: 0.8 };
+      return { color: '#ffff00', glowColor: '#ffff44', opacity: 0.8 };
     case TileType.CHARACTER_SPAWN:
-      return { color: '#88ff88', glowColor: '#aaffaa', height: 5, opacity: 0.8 };
+      return { color: '#88ff88', glowColor: '#aaffaa', opacity: 0.8 };
     default:
-      return { color: '#666666', glowColor: '#888888', height: 0, opacity: 0.8 };
+      return { color: '#666666', glowColor: '#888888', opacity: 0.8 };
   }
 };
 
-// Character colors with neon glow
+// Character colors with neon glow - consistent height
 const getCharacterStyle = (character: Character): { 
   bodyColor: string; 
   glowColor: string; 
@@ -69,9 +68,9 @@ const getCharacterStyle = (character: Character): {
     case 'player':
       return { bodyColor: '#00ffff', glowColor: '#44ffff', height: 20 };
     case 'npc':
-      return { bodyColor: '#ff00ff', glowColor: '#ff44ff', height: 15 };
+      return { bodyColor: '#ff00ff', glowColor: '#ff44ff', height: 20 };
     default:
-      return { bodyColor: '#ffffff', glowColor: '#cccccc', height: 15 };
+      return { bodyColor: '#ffffff', glowColor: '#cccccc', height: 20 };
   }
 };
 
@@ -87,6 +86,7 @@ const IsometricTile: React.FC<{
   isHovered?: boolean;
   hexSize: number;
   screenPosition: { x: number; y: number };
+  pulseOffset: number;
 }> = ({ 
   tile, 
   character, 
@@ -97,10 +97,14 @@ const IsometricTile: React.FC<{
   isSelected, 
   isHovered, 
   hexSize, 
-  screenPosition 
+  screenPosition,
+  pulseOffset
 }) => {
   const tileStyle = getTileStyle(tile.type);
-  const block = createIsometric3DBlock(0, 0, hexSize, Math.max(0, tileStyle.height));
+  
+  // Create isometric hexagon shape at consistent height
+  const tileHeight = 10; // Uniform height for all tiles
+  const hexPath = createIsometricHexPath(0, 0, hexSize * 0.9, tileHeight);
   
   // Enhanced glow effect for selected/hovered tiles
   const glowIntensity = isSelected ? 8 : isHovered ? 4 : 2;
@@ -114,7 +118,7 @@ const IsometricTile: React.FC<{
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {/* Glow effect filter */}
+      {/* Glow effect filter and pulse animation */}
       <defs>
         <filter id={`glow-${tile.position.q}-${tile.position.r}`} x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation={glowIntensity} result="coloredBlur"/>
@@ -125,39 +129,43 @@ const IsometricTile: React.FC<{
         </filter>
       </defs>
       
-      {/* 3D Block rendering */}
-      {tileStyle.height > 0 && (
-        <>
-          {/* Left face (darker) */}
-          <path
-            d={block.left}
-            fill={tileStyle.color}
-            opacity={tileStyle.opacity * 0.6}
-            stroke="#000000"
-            strokeWidth={0.5}
-          />
-          
-          {/* Right face (medium) */}
-          <path
-            d={block.right}
-            fill={tileStyle.color}
-            opacity={tileStyle.opacity * 0.8}
-            stroke="#000000"
-            strokeWidth={0.5}
-          />
-        </>
-      )}
-      
-      {/* Top face (brightest) */}
+      {/* Rounded hexagon tile */}
       <path
-        d={block.top}
+        d={hexPath}
         fill={tileStyle.color}
         opacity={tileStyle.opacity}
-        stroke={isSelected ? '#ffffff' : isHovered ? tileStyle.glowColor : '#000000'}
-        strokeWidth={strokeWidth}
+        stroke={tileStyle.glowColor}
+        strokeWidth={strokeWidth + 1}
         filter={`url(#glow-${tile.position.q}-${tile.position.r})`}
         style={{ pointerEvents: 'all' }}
-      />
+      >
+        <animate
+          attributeName="opacity"
+          values="0.8;0.95;0.8"
+          dur="3s"
+          repeatCount="indefinite"
+          begin={`${pulseOffset}s`}
+        />
+      </path>
+      
+      {/* Enhanced border glow */}
+      <path
+        d={hexPath}
+        fill="none"
+        stroke={tileStyle.glowColor}
+        strokeWidth={strokeWidth + 2}
+        opacity={0.6}
+        filter={`url(#glow-${tile.position.q}-${tile.position.r})`}
+        style={{ pointerEvents: 'none' }}
+      >
+        <animate
+          attributeName="stroke-width"
+          values={`${strokeWidth + 1};${strokeWidth + 1.5};${strokeWidth + 1}`}
+          dur="3s"
+          repeatCount="indefinite"
+          begin={`${pulseOffset}s`}
+        />
+      </path>
       
       {/* Tile center glow */}
       {(isSelected || isHovered) && (
@@ -176,7 +184,7 @@ const IsometricTile: React.FC<{
         <IsometricCharacterSprite
           character={character}
           hexSize={hexSize}
-          tileHeight={tileStyle.height}
+          tileHeight={tileHeight}
         />
       )}
       
@@ -185,7 +193,7 @@ const IsometricTile: React.FC<{
         <IsometricPizzaSprite
           pizza={pizza}
           hexSize={hexSize}
-          tileHeight={tileStyle.height}
+          tileHeight={tileHeight}
         />
       )}
       
@@ -398,7 +406,7 @@ export const IsometricHexGridVisualization: React.FC<IsometricHexGridVisualizati
         <rect width="100%" height="100%" fill="url(#stars)" opacity="0.6"/>
         
         {/* Render tiles in depth order */}
-        {tilePositions.map(({ tile, screenPos }) => {
+        {tilePositions.map(({ tile, screenPos }, index) => {
           const character = characters.find(c => 
             c.position.q === tile.position.q && c.position.r === tile.position.r
           );
@@ -410,6 +418,9 @@ export const IsometricHexGridVisualization: React.FC<IsometricHexGridVisualizati
             selectedHex.q === tile.position.q && selectedHex.r === tile.position.r);
           const isHovered = Boolean(hoveredHex && 
             hoveredHex.q === tile.position.q && hoveredHex.r === tile.position.r);
+
+          // Create staggered pulse timing for tiles
+          const pulseOffset = (index * 0.1) % 3;
 
           return (
             <IsometricTile
@@ -427,6 +438,7 @@ export const IsometricHexGridVisualization: React.FC<IsometricHexGridVisualizati
                 x: screenPos.x + offsetX,
                 y: screenPos.y + offsetY,
               }}
+              pulseOffset={pulseOffset}
             />
           );
         })}
