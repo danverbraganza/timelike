@@ -42,11 +42,11 @@
 
 ### Implementation Priority Questions
 
-12. **MVP Scope**: What's the minimum viable product that demonstrates the core time manipulation mechanics? Should we focus on a single level prototype first?
+12. **MVP Scope**: ✅ RESOLVED - MVP will focus on turn-based gameplay with pizza delivery mechanics on a single procedurally generated level. Time manipulation features will come in Phase 4 after core gameplay is solid.
 
-13. **Testing Strategy**: How do we test complex temporal interactions? Should we build debugging tools to visualize timeline states?
+13. **Testing Strategy**: ✅ PARTIALLY RESOLVED - Using comprehensive unit tests for game logic (120+ tests currently passing). Planning to add integration tests for turn sequences and UI component tests. Debugging tools will be built into UIStore (timeline debugger modal already exists).
 
-14. **Performance Targets**: What are our performance requirements for the web version? How complex can levels be before we hit performance issues?
+14. **Performance Targets**: DECISION NEEDED - Current implementation runs smoothly with 14x12 hex grids. Should we target 20x20 grids as maximum? How many NPCs and pizzas should we support per level?
 
 ### Development Process Questions
 
@@ -57,3 +57,27 @@
 17. **Testing Standards**: What level of test coverage should we maintain? Should every game mechanic have unit tests, or focus on integration tests for complex interactions?
 
 18. **Code Review Process**: How should multiple coding agents coordinate changes to avoid conflicts? Should there be designated "owners" for different modules?
+
+### ✅ NEW ARCHITECTURAL DECISIONS (Phase 2 Planning)
+
+19. **Turn System Architecture**: ✅ DECIDED - Implementing TurnManager class with phases: Player Phase → NPC Phase → Turn End → New Turn. Will integrate with existing GameStateManager for bitemporal storage.
+
+20. **Movement Point System**: ✅ DECIDED - Starting with 1 movement point per turn per character. Pepperoni pizza adds +1 movement point. System designed for easy extension with other pizza effects.
+
+21. **NPC AI Strategy**: ✅ DECIDED - Simple AI for MVP: NPCs move toward nearest pizza or player using existing A* pathfinding. Deterministic processing order (by ID) for consistent replays.
+
+22. **Animation Framework**: ✅ DECIDED - Smooth character transitions with configurable speed via UIStore. Animations queue for multi-step paths and pause between character turns.
+
+23. **UI Layout Design**: ✅ DECIDED - Game grid as main content with HUD overlay. Control panel on right side, status messages in top-right. All UI components use Zustand stores exclusively.
+
+### 🔄 QUESTIONS FOR NEXT PHASE IMPLEMENTATION
+
+24. **Turn Transition Timing**: Should there be a brief pause between player ending turn and NPCs starting to move? This could help players track what's happening.
+
+25. **Pizza Delivery Validation**: How should we validate pizza deliveries? Should NPCs have specific pizza requests, or accept any pizza?
+
+26. **Level Win Condition**: Is the win condition "deliver all pizzas" or "deliver X number of pizzas within time limit"? This affects game balance.
+
+27. **Error Handling Strategy**: How should we handle edge cases like NPCs getting stuck, invalid moves, or animation failures? Should the game pause or continue?
+
+28. **Development Coordination**: Should Tasks 4, 5, and 12 be worked on sequentially or in parallel by different coding agents? What are the integration points?

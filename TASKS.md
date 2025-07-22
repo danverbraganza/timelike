@@ -73,7 +73,60 @@ Description: Create the core turn-based game loop system. Handle player input, c
 Status: READY
 Blocked by: Task 3 (COMPLETED), Task 19 (COMPLETED)
 Assigned to: Coding Agent
-Note: This task is now ready to begin as both required dependencies (core game state architecture and state management foundation) are completed.
+Priority: CRITICAL - This unlocks most other gameplay features
+
+## DETAILED IMPLEMENTATION SPECIFICATION:
+
+### Core Requirements:
+1. **Turn System Architecture**:
+   - Create `TurnManager` class in `src/game/TurnManager.ts`
+   - Phases: Player Phase → NPC Phase → Turn End → New Turn
+   - Track current turn number, phase, and active character
+   - Integration with existing GameStateManager for bitemporal storage
+
+2. **Player Phase Logic**:
+   - Allow player movement within movement point constraints (start with 1 point per turn)
+   - Handle pizza pickup/delivery actions
+   - Validate all actions before execution
+   - End phase when player confirms "End Turn" or uses all actions
+
+3. **NPC Phase Logic**:
+   - Simple AI: NPCs move toward nearest pizza or player
+   - Each NPC gets movement points based on their stats
+   - NPCs respect terrain and collision rules
+   - Process NPCs in deterministic order (by ID)
+
+4. **Turn Progression**:
+   - Save complete turn state to bitemporal store
+   - Increment turn counter
+   - Reset movement points for all characters
+   - Check win/lose conditions
+   - Handle level timer if applicable
+
+5. **State Integration**:
+   - Use existing GameStore for turn state management
+   - Fire events for UI updates (turn change, phase change)
+   - Maintain compatibility with existing useGameIntegration hook
+
+### Implementation Files:
+- `src/game/TurnManager.ts` - Core turn logic
+- `src/game/ai/SimpleAI.ts` - Basic NPC behavior
+- Update `src/store/gameStore.ts` - Add turn management actions
+- `src/__tests__/game/TurnManager.test.ts` - Comprehensive tests
+
+### Success Criteria:
+- Player can take actions and end turn
+- NPCs move automatically after player
+- Turn counter advances correctly
+- All actions properly logged in bitemporal store
+- UI reflects current turn/phase state
+- 15+ unit tests covering all scenarios
+
+### Architecture Notes:
+- Keep turn logic separate from UI components
+- Use event system for loose coupling
+- Design for future time manipulation features
+- Follow existing patterns in GameStateManager
 
 ------
 
@@ -81,9 +134,73 @@ Id: 5
 Title: Character Movement System
 Description: Implement character movement on the hexagonal grid, including pathfinding, collision detection, and movement validation. Support for different movement speeds.
 Status: READY
-Blocked by: Task 3 (COMPLETED), Task 19 (COMPLETED)
+Blocked by: Task 4 (Turn-Based Game Loop) - Movement must respect turn constraints
 Assigned to: Coding Agent
-Note: This task is now ready to begin as both required dependencies (core game state architecture and state management foundation) are completed.
+Priority: HIGH - Core gameplay mechanic
+
+## DETAILED IMPLEMENTATION SPECIFICATION:
+
+### Core Requirements:
+1. **Enhanced Movement System**:
+   - Extend existing click-to-move with turn-based constraints
+   - Movement point system (characters have movement points per turn)
+   - Path preview before movement execution
+   - Animated movement transitions
+   - Support for different movement speeds per character type
+
+2. **Movement Validation**:
+   - Check movement points available
+   - Validate path is clear and walkable
+   - Prevent movement through other characters
+   - Handle special terrain effects (water requires swimming, etc.)
+   - Respect turn phase (only active character can move)
+
+3. **Path Visualization**:
+   - Show movement path preview on hover
+   - Highlight valid movement range
+   - Display movement cost for each hex
+   - Visual feedback for invalid moves
+
+4. **Animation System**:
+   - Smooth character transitions between hexes
+   - Configurable animation speed (via UIStore preferences)
+   - Queue movements for smooth multi-step paths
+   - Pause for animations before next character's turn
+
+5. **Pizza Effects Integration**:
+   - Pepperoni Pizza: +1 movement point
+   - Design extensible system for future pizza effects
+   - Track and display active effects per character
+
+### Implementation Files:
+- `src/game/MovementSystem.ts` - Core movement logic and validation
+- `src/game/PathPreview.ts` - Path visualization and range calculation
+- `src/components/MovementAnimation.tsx` - Animation components
+- Update `src/store/gameStore.ts` - Add movement actions and state
+- Update `src/components/HexGridVisualization.tsx` - Add path preview rendering
+- `src/__tests__/game/MovementSystem.test.ts` - Movement logic tests
+
+### Success Criteria:
+- Characters move smoothly with animations
+- Movement respects turn-based constraints
+- Path preview shows before movement
+- Movement points correctly tracked and displayed
+- Different character types can have different movement speeds
+- All movements properly validated
+- 20+ unit tests covering all movement scenarios
+
+### Architecture Notes:
+- Build on existing A* pathfinding from Task 2
+- Integrate with TurnManager from Task 4
+- Keep movement logic in game layer, animations in UI
+- Use existing coordinate system and hex utilities
+- Design for future time manipulation features
+
+### UI Integration:
+- Show movement points remaining in character info
+- Highlight movement range on character selection
+- Display path preview on hex hover
+- Add "End Turn" button when movement is complete
 
 ------
 
@@ -159,7 +276,91 @@ Description: Create the main game UI including hex grid display, character rende
 Status: READY
 Blocked by: Task 3 (COMPLETED), Task 19 (COMPLETED)
 Assigned to: Coding Agent
-Note: This task is now ready to begin as both required dependencies (core game state architecture and state management foundation) are completed.
+Priority: HIGH - Can be developed in parallel with turn system
+
+## DETAILED IMPLEMENTATION SPECIFICATION:
+
+### Core UI Components:
+1. **Game HUD (Heads-Up Display)**:
+   - Create `src/components/GameHUD.tsx`
+   - Turn counter and phase indicator
+   - Level timer (countdown display)
+   - Current player indicator
+   - Movement points remaining
+   - Pizza inventory display
+
+2. **Control Panel**:
+   - Create `src/components/GameControls.tsx`
+   - "End Turn" button (enabled only during player phase)
+   - "Pause Game" button
+   - "Settings" button
+   - "Restart Level" button
+   - View toggle (2D/Isometric)
+
+3. **Character Info Panel**:
+   - Create `src/components/CharacterInfo.tsx`
+   - Selected character stats
+   - Movement points available
+   - Active pizza effects
+   - Pizza carried (if any)
+
+4. **Level Info Display**:
+   - Create `src/components/LevelInfo.tsx`
+   - Level number and name
+   - Objectives (pizzas to deliver)
+   - Time remaining
+   - Score/progress tracking
+
+5. **Status Messages**:
+   - Extend existing success/error message system
+   - Turn transition notifications
+   - Action feedback ("Player moved", "Pizza picked up")
+   - Invalid action warnings
+
+### Layout and Responsive Design:
+1. **Desktop Layout**:
+   - Game grid as main content (existing)
+   - HUD overlay on top/sides
+   - Control panel on right side
+   - Status messages in top-right corner
+
+2. **Component Integration**:
+   - All components use existing Zustand stores
+   - No direct game logic in UI components
+   - Clean integration with useGameIntegration hook
+
+### Implementation Files:
+- `src/components/GameHUD.tsx` - Main game status display
+- `src/components/GameControls.tsx` - Game control buttons
+- `src/components/CharacterInfo.tsx` - Character stats panel
+- `src/components/LevelInfo.tsx` - Level status and objectives
+- `src/components/StatusMessage.tsx` - Enhanced message display
+- Update `src/components/Game.tsx` - Integrate new UI components
+- Update `src/components/index.ts` - Export new components
+- `src/__tests__/components/GameHUD.test.tsx` - UI component tests
+
+### Success Criteria:
+- All game information clearly displayed
+- Turn system controls functional
+- Responsive layout works on different screen sizes
+- UI updates in real-time with game state
+- All interactions properly integrated with stores
+- 15+ component tests with React Testing Library
+- Clean, consistent visual design
+
+### Design Requirements:
+- Follow existing color scheme (neon/mystic theme)
+- Use consistent spacing and typography
+- Accessible design (proper contrast, keyboard navigation)
+- Smooth transitions and hover effects
+- Visual feedback for all interactive elements
+
+### Architecture Notes:
+- UI components only handle presentation
+- All state accessed through Zustand stores
+- Event handlers delegated to useGameIntegration
+- Modular design for easy extension
+- Performance optimized with React.memo where needed
 
 ------
 
